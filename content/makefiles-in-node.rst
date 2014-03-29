@@ -34,7 +34,8 @@ For more complex situations like Web applications, you may also use a
 :abbr:`UNIX`-ish, generic build system. The most well-known is probably `GNU
 Make`_, but `Ninja`_ is another example. Instead of resting upon plugins,
 they let the developer use any command-line statement. As such, they foster
-*composability*, while plugins express *extensibility*.
+*composability*, while plugins are more advocating configuration and
+*extensibility*.
 
 .. _GNU Make: https://www.gnu.org/software/make/
 .. _Ninja: http://martine.github.io/ninja/
@@ -132,7 +133,7 @@ technique`_ in grunt.js:
 
 In a lot of cases the grunt.js file will be simpler. This is partly because
 plugins target specific use cases while the ``Makefile`` syntax is broad. The
-benefit of ``make``, then, will come from its flexibility -- the ability to
+benefit of ``make``, then, arise from its flexibility -- the ability to
 change micro-behaviors. With plugins this is done by configuration. With
 ``make`` this is done by changing the composition of the ``Makefile`` or the
 command-lines.
@@ -170,22 +171,22 @@ an input source map to uglifyjs`__.
 Final Words
 ===========
 
-Using a ``Makefile`` also let you use whatever version of the packages
-containing command-line tools. They don't even have to be ``npm`` packages:
-you may use ruby gems, etc. -- Sass_ comes to mind. With node.js build tools,
-some plugins use the `peerDependencies field`_ to let you choose the version,
-but it is not always implemented. In this case, you may have to fork the plugin
-to be able to use a specific version.
+Using a ``Makefile`` also let you use any version of the command-line tool
+packages. They don't even have to be ``npm`` packages: you may use ruby gems,
+etc. -- Sass_ comes to mind. With node.js build tools, some plugins use the
+`peerDependencies field`_ to let you choose the version, but it is not always
+implemented. In this case, you may have to fork the plugin to be able to use a
+specific version.
 
 Now, for the ugly: yes, GNU Make on Windows can be a total pain. Similarly,
-the shell that execute the command-lines -- ``cmd.exe`` -- lacks a lot of
+the shell that executes the command-lines -- ``cmd.exe`` -- lacks a lot of
 ``bash`` features. Some commands are not available or got different names,
 like ``cat``. This may improve in the future, but Makefiles are clearly not
 practical enough on Windows.
 
 If however you are working on a :abbr:`UNIX`-only project -- including Linux and
 OS X --, you may want to give it a try, and compare how well it performs
-towards the now-usual node.js build tools.
+towards the now-usual node.js build tools: GNU Make is by no means obsolete.
 
 .. _Sass: http://sass-lang.com/
 .. _peerDependencies field: http://blog.nodejs.org/2013/02/07/peer-dependencies/
@@ -193,10 +194,13 @@ towards the now-usual node.js build tools.
 Further reading
 ---------------
 
-* `Let's Make a Framework: JSLint, Makefiles <http://dailyjs.com/2011/08/11/framework-75/>`_;
-* `Makefile recipes for node.js packages <http://andreypopp.com/posts/2013-05-16-makefile-recipes-for-node-js.html>`_;
+* `Let's Make a Framework: JSLint, Makefiles <http://dailyjs.com/2011/08/11/
+  framework-75/>`_;
+* `Makefile recipes for node.js packages <http://andreypopp.com/posts/
+  2013-05-16-makefile-recipes-for-node-js.html>`_;
 * `Introducing Grunt <http://weblog.bocoup.com/introducing-grunt/>`_ talks about
   the initial idea behind making a replacement for ``make``;
-* `Node.js, Ant, Grunt and other build tools <http://blog.millermedeiros.com/node-js-ant-grunt-and-other-build-tools/>`_ makes a point against plugins;
-* `Why Grunt? Why not something else? <http://benalman.com/news/2012/08/why-grunt/>`_ is an
-  answer to the above.
+* `Node.js, Ant, Grunt and other build tools <http://blog.millermedeiros.com/
+  node-js-ant-grunt-and-other-build-tools/>`_ makes a point against plugins;
+* `Why Grunt? Why not something else? <http://benalman.com/news/2012/08/
+  why-grunt/>`_ is an answer to the above.
