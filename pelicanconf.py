@@ -42,6 +42,8 @@ RELATED_POSTS_MAX = 3
 THEME = 'themes/cast'
 AUTHOR_SAVE_AS = False
 DIRECT_TEMPLATES = ('index', 'archives')
+STATIC_PATHS = ['extra/CNAME']
+EXTRA_PATH_METADATA = {'extra/CNAME': {'path': 'CNAME'},}
 
 from datetime import datetime as dt
 
