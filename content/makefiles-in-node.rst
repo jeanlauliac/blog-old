@@ -5,6 +5,7 @@ A Case for Makefiles in Node.js
 :slug: makefiles-in-node
 :summary: Leveraging an “ancient” but well-tried technology for Web,
           node.js projects
+:status: draft
 
 We have seen a lot of *build tools* -- or \`\`task runners'' -- being built in
 the `node.js`_ world, `grunt.js`_ seemingly being the most popular one, along
