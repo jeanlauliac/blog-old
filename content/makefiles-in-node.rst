@@ -3,13 +3,14 @@ Makefiles in Node.js
 
 :date: 2014-03-23 11:52
 :slug: makefiles-in-node
-:summary: Leveraging a well-tried technology for Web, node.js projects
+:summary: Leveraging an “ancient” but well-tried technology for Web,
+          node.js projects
 
-We have seen a lot of \`\`build tools'' being built in the `node.js`_ world,
-`grunt.js`_ and `gulp.js`_ seemingly being the most popular ones. Those provide
-an all-in-one solution, supported by a myriad of plugins. They are appealing for
-their relative simplicity. As such, they provide a quite decent solution for
-most projects.
+We have seen a lot of *build tools* -- or \`\`task runners'' -- being built in
+the `node.js`_ world, `grunt.js`_ and `gulp.js`_ seemingly being the most
+popular ones. Those provide an all-in-one solution, supported by a myriad of
+plugins. They are appealing for their relative simplicity. As such, they provide
+a quite decent solution for most projects.
 
 .. _node.js: http://nodejs.org/
 .. _grunt.js: http://gruntjs.com/
@@ -17,20 +18,18 @@ most projects.
 
 There are alternatives, however, and they are not without strong arguments.
 Let's not forget the `capability of simple npm scripts`__ for the simplest
-projects. `Keeping things small`_ is part of the node.js philosophy: naturally
-the technique is much useful for tiny libraries.
+projects. After all, `keeping things small`_ is part of the node.js philosophy,
+and leads naturally to manageable projects.
 
 .. __: http://substack.net/task_automation_with_npm_run
-.. _Keeping things small: http://blog.izs.me/post/
+.. _keeping things small: http://blog.izs.me/post/
                           48281998870/unix-philosophy-and-node-js
 
-For more complex situations like Web applications, you can use a
-:abbr:`UNIX`-ish, generic build system. The most well-know is probably `GNU Make`_, but
-`Ninja`_ is another example.
-
-Instead of resting upon plugins, they let the developer use any command-line
-statement. As such, they foster a greater reusability: command-line tools
-express *composability*. Plugins express *extensibility*.
+For more complex situations like Web applications, you may also use a
+:abbr:`UNIX`-ish, generic build system. The most well-know is probably `GNU
+Make`_, but `Ninja`_ is another example. Instead of resting upon plugins,
+they let the developer use any command-line statement. As such, they foster
+*composability*, while plugins express *extensibility*.
 
 What does it mean? You can call a command-line tool without the need of any
 build system. But you cannot use a grunt.js plugin outside from the tool
@@ -53,7 +52,7 @@ have been modified since the last build:
 
 .. code-block:: make
 
-    foo.js: foo.coffee
+    dest/foo.js: foo.coffee
         coffee < $< > $@
 
 Here ``$<`` and ``$@`` are `automatic variables`_ providing contextual
@@ -65,21 +64,49 @@ file paths. Calling ``make`` from the command line yields:
 .. code-block:: bash
 
     make
-    #=> coffee < foo.coffee > foo.js
+    #=> coffee < foo.coffee > dest/foo.js
     make
-    #=> make: Nothing to be done for `foo.js'.
+    #=> make: Nothing to be done for `dest/foo.js'.
 
-This is an especially useful behavior on large projects with lots of files
-to transpile. It makes development iterations faster.
+This is an especially useful behavior on large projects, where it makes
+development iterations faster.
 
 In a bunch of cases you will want to write general transformation rules. GNU
 Make makes this pretty easy to do:
 
 .. code-block:: make
 
-    %.js: %.coffee
+    dest/%.js: %.coffee
         coffee < $< > $@
 
+Arguably, it is simpler than -- for example -- the `globbing technique`_ in
+grunt.js:
+
+.. _globbing technique: https://www.npmjs.org/package/grunt-contrib-coffee
+
+.. code-block:: js
+
+    // [...]
+    coffee: {
+        glob_to_multiple: {
+            expand: true,
+            flatten: true,
+            cwd: '.',
+            src: ['*.coffee'],
+            dest: 'dest/',
+            ext: '.js'
+        }
+    }
+
+In a lot of cases, however, the grunt.js file will be simpler. This is because
+plugins target very specific use cases while the ``Makefile`` syntax is very
+broad. The benefit of ``make``, then, will come from its flexibility -- the
+ability to change micro-behaviors. With plugins this is done by configuration.
+With ``make`` this is done by changing the *composition* of the ``Makefile`` or
+the command-lines.
+
+Flexibility
+===========
 
 Where are my tasks?
 ===================
@@ -98,9 +125,15 @@ This is the direct equivalent of registering a task as a list in ``grunt``:
 
     grunt.registerTask('all', ['jshint', 'qunit', 'concat', 'uglify']);
 
+Final words
+===========
+
+Among other benefits, using a ``Makefile`` let you use whatever version
+of the packages containing command-line tools. Plus, it doesn't even have
+to be npm packages: you may use ruby gems easily.
+
 Further reading
-===============
+---------------
 
 * `Let's Make a Framework: JSLint, Makefiles <http://dailyjs.com/2011/08/11/framework-75/>`_
 * `Makefile recipes for node.js packages <http://andreypopp.com/posts/2013-05-16-makefile-recipes-for-node-js.html>`_
-
