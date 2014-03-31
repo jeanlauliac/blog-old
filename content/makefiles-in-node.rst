@@ -232,9 +232,10 @@ Conclusion
 
 Using a ``Makefile`` also let you use any version of the packages. They don't
 even have to be ``npm`` packages: you may use ruby gems, etc. -- Sass_ comes to
-mind. With node.js build tools, some plugins use the `peerDependencies field`_
-to let you choose the version, but it is not always employed. In this case, you
-may have to fork the plugin just to change the version.
+mind. With node.js build tools, some plugins use `broad specifiers`_ or
+`peerDependencies`_ to let you choose the version, but you're out of luck if you
+want to use a newer, unsupported version. In this case, forking the plugin may
+be necessary.
 
 Using Makefiles is essentially bringing a bunch of small, existing tools;
 and assembling them as building bricks. The tools themselves can be arbitrarily
@@ -251,7 +252,8 @@ OS X --, you may want to give it a try, and compare how well it performs
 towards the now-usual node.js build tools: GNU Make is by no means obsolete.
 
 .. _Sass: http://sass-lang.com/
-.. _peerDependencies field: http://blog.nodejs.org/2013/02/07/peer-dependencies/
+.. _broad specifiers: https://www.npmjs.org/doc/json.html#dependencies
+.. _peerDependencies: http://blog.nodejs.org/2013/02/07/peer-dependencies/
 
 Further reading
 ---------------
