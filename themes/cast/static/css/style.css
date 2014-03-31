@@ -224,3 +224,22 @@ ul#post-list p {
     font-size: 1.781rem;
     font-style: normal;
 }
+
+#contentinfo ul {
+    list-style: none;
+    margin: 1em 0;
+    padding: 0;
+}
+
+#contentinfo li {
+    display: inline;
+}
+
+#contentinfo li + li::before {
+    content: ' \25AA  ';
+    font-style: normal;
+}
+
+#contentinfo a {
+    color: #444;
+}

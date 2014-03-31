@@ -214,8 +214,10 @@ will be executed asynchonously`__ as interpreted by the shell; effectively
 supervising and serving files at the same time. Interrupting the ``make``
 process with ``Ctrl-C`` stops both.
 
-Here again, we could do better: LiveReload_ could be added by using the
-tiny-lr_ package and doing POST requests on change with ``wget``.
+We could add LiveReload_ as well using the tiny-lr_ package. Here again, it
+exposes a command-line tool running a LiveReload server. You can then make
+``POST`` requests with ``curl`` to signal changes as described in the
+documentation.
 
 .. _grunt-contrib-watch: https://www.npmjs.org/package/grunt-contrib-watch
 .. _inotify: http://man7.org/linux/man-pages/man7/inotify.7.html
@@ -225,14 +227,18 @@ tiny-lr_ package and doing POST requests on change with ``wget``.
 .. _serve: https://www.npmjs.org/package/serve
 .. __: http://www.gnu.org/software/bash/manual/html_node/Lists.html#Lists
 
-Final Words
-===========
+Conclusion
+==========
 
 Using a ``Makefile`` also let you use any version of the packages. They don't
 even have to be ``npm`` packages: you may use ruby gems, etc. -- Sass_ comes to
 mind. With node.js build tools, some plugins use the `peerDependencies field`_
 to let you choose the version, but it is not always employed. In this case, you
-may have to fork the plugin to be able to use a specific version.
+may have to fork the plugin just to change the version.
+
+Using Makefiles is essentially bringing a bunch of small, existing tools;
+and assembling them as building bricks. The tools themselves can be arbitrarily
+complex and in any language -- javascript, bash --, so you are not limited.
 
 Now, for the ugly: yes, GNU Make on Windows can be a total pain. Similarly,
 the shell that executes the command-lines -- ``cmd.exe`` -- lacks a lot of
