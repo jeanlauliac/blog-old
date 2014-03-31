@@ -58,11 +58,14 @@ have been modified since the last build:
 
 .. code-block:: make
 
+    BIN=node_modules/.bin/
+
     dest/foo.js: foo.coffee
-        coffee -sc < $< > $@
+        $(BIN)coffee -sc < $< > $@
 
 Here ``$<`` and ``$@`` are `automatic variables`_ providing contextual
-file paths. Calling ``make`` from the command line yields:
+file paths. We also make sure to use the local CoffeeScript compiler, because
+we want to control the version. Calling ``make`` from the command line yields:
 
 .. _automatic variables: https://www.gnu.org/software/make/manual/
                          html_node/Automatic-Variables.html
@@ -70,7 +73,7 @@ file paths. Calling ``make`` from the command line yields:
 .. code-block:: bash
 
     make
-    #=> coffee -sc < foo.coffee > dest/foo.js
+    #=> node_modules/.bin/coffee -sc < foo.coffee > dest/foo.js
     make
     #=> make: Nothing to be done for `dest/foo.js'.
 
@@ -103,15 +106,17 @@ Make makes this pretty easy to do:
 
 .. code-block:: make
 
+    BIN=node_modules/.bin/
+
     .PHONY: all
     all: $(patsubst %.coffee,dest/%.js,$(wildcard *.coffee))
 
     dest/%.js: %.coffee
-        coffee -sc < $< > $@
+        $(BIN)coffee -sc < $< > $@
 
-It is combined with the `wildcard function`_ to avoid listing files manually.
-Arguably, it is easier or not to read than -- for example -- the `globbing
-technique`_ in grunt.js:
+It is combined here with the `wildcard function`_ to avoid listing files
+manually. Arguably, it is easier, or not, to read than -- for example -- the
+`globbing technique`_ in grunt.js:
 
 .. _wildcard function: http://www.gnu.org/software/make/manual/
                        make.html#Wildcard-Function
@@ -131,21 +136,22 @@ technique`_ in grunt.js:
         }
     }
 
-In a lot of cases the grunt.js file will be simpler. This is partly because
-plugins target specific use cases while the ``Makefile`` syntax is broad. The
-benefit of ``make``, then, arise from its flexibility -- the ability to
-change micro-behaviors. With plugins this is done by configuration. With
-``make`` this is done by changing the composition of the ``Makefile`` or the
-command-lines.
+In a lot of cases the grunt.js file may actually be simpler. This is partly
+because plugins target specific use cases while the ``Makefile`` syntax is
+broad. The benefit of ``make``, then, arise from its flexibility -- the ability
+to change micro-behaviors. With plugins this is done by configuration, where
+you rely on the implementor choices.
 
 Let's Concat
 ============
 
-Here is a last example: let's say we want to compile all our coffee scripts to
-Javascript, then concatenate and minify them into a `bundle.js`. Here's what we
-get:
+Here is a more complete example: let's say we want to compile all our coffee
+scripts to Javascript, then concatenate and minify them into a `bundle.js`.
+Here's a solution:
 
 .. code-block:: make
+
+    BIN=node_modules/.bin/
 
     .PHONY: all
     all: bundle.js
@@ -154,13 +160,13 @@ get:
         cat $^ | uglifyjs -c - > $@
 
     dest/%.js: %.coffee
-        coffee -sc < $< > $@
+        $(BIN)coffee -sc < $< > $@
 
-``$^`` is another automatic variable containing the name of all the
-prerequisites; here, the ``.js`` files. We just added an additional layer of
-processing to the ``Makefile``. With a build tool, you would need a plugin for
-each step, with the proper configuration; this can be easier or harder depending
-on the plugin author goals.
+We just added an additional layer of processing to the ``Makefile``. Note how
+similar it looks to the previous version. ``$^`` is another automatic variable
+containing the name of all the prerequisites; here, the ``.js`` files.  With a
+build tool, you may need a plugin for each step, with the proper
+configuration and intermediate file.
 
 This simple example lacks some features, notably the source
 map generation. This could be done with a custom ``cat`` command and `specifying
@@ -168,15 +174,65 @@ an input source map to uglifyjs`__.
 
 .. __: https://github.com/mishoo/UglifyJS2#composed-source-map
 
+Rebuild on Change
+=================
+
+One of the handy grunt.js plugins is grunt-contrib-watch_ that let you
+execute tasks when some file changes; making development iterations faster.
+How can we get this behavior with ``make``?
+
+Apart from platform-specific APIs like inotify_, we can use node.js's own file
+watching mechanism. The package supervisor_ exposes this feature as a
+command-line tool. We can add a new phony target ``auto`` as such:
+
+.. code-block:: make
+
+    .PHONY: auto
+    auto:
+        $(BIN)supervisor -q -w . -e 'coffee' -n exit -x make all
+
+``-n exit`` prevents ``supervisor`` from running ``make`` again and again.
+``-x make`` replace the default program -- ``node`` -- run by ``supervisor``.
+``all`` will be passed as argument, the rule we defined before; so that
+indeed the coffee files are recompiled on change. Note that the
+incremental build is still in action here: when a file change, only this one
+is transpiled to JavaScript.
+
+Let's imagine this is part of a static website compilation process: we may
+want to serve the files in the ``dest`` directory over HTTP. The serve_
+package and command-line tool can fulfill this goal:
+
+.. code-block:: make
+
+    .PHONY: auto
+    auto:
+        $(BIN)supervisor -q -w . -e 'coffee' -n exit -x make all &
+        $(BIN)serve dest
+
+Note how we use ``&`` at the end of the first line. This means the `commands
+will be executed asynchonously`__ as interpreted by the shell; effectively
+supervising and serving files at the same time. Interrupting the ``make``
+process with ``Ctrl-C`` stops both.
+
+Here again, we could do better: LiveReload_ could be added by using the
+tiny-lr_ package and doing POST requests on change with ``wget``.
+
+.. _grunt-contrib-watch: https://www.npmjs.org/package/grunt-contrib-watch
+.. _inotify: http://man7.org/linux/man-pages/man7/inotify.7.html
+.. _supervisor: https://www.npmjs.org/package/supervisor
+.. _LiveReload: http://livereload.com/
+.. _tiny-lr: https://www.npmjs.org/package/tiny-lr
+.. _serve: https://www.npmjs.org/package/serve
+.. __: http://www.gnu.org/software/bash/manual/html_node/Lists.html#Lists
+
 Final Words
 ===========
 
-Using a ``Makefile`` also let you use any version of the command-line tool
-packages. They don't even have to be ``npm`` packages: you may use ruby gems,
-etc. -- Sass_ comes to mind. With node.js build tools, some plugins use the
-`peerDependencies field`_ to let you choose the version, but it is not always
-implemented. In this case, you may have to fork the plugin to be able to use a
-specific version.
+Using a ``Makefile`` also let you use any version of the packages. They don't
+even have to be ``npm`` packages: you may use ruby gems, etc. -- Sass_ comes to
+mind. With node.js build tools, some plugins use the `peerDependencies field`_
+to let you choose the version, but it is not always employed. In this case, you
+may have to fork the plugin to be able to use a specific version.
 
 Now, for the ugly: yes, GNU Make on Windows can be a total pain. Similarly,
 the shell that executes the command-lines -- ``cmd.exe`` -- lacks a lot of
