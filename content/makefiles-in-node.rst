@@ -1,60 +1,54 @@
 A Case for Makefiles in Node.js
 ###############################
 
-:date: 2014-03-23 11:52
+:date: 2014-04-16 11:42
 :slug: makefiles-in-node
-:summary: Leveraging an “ancient” but well-tried technology for Web,
+:summary: Leveraging an “ancient” but well-tried technology for Web
           node.js projects
-:status: draft
 
-We have seen a lot of *build tools* -- or \`\`task runners'' -- being built in
-the `node.js`_ world, `grunt.js`_ seemingly being the most popular one, along
+We see a lot of *build tools* -- or \`\`task runners'' -- being built in
+the `node.js`_ world. `Grunt.js`_ seems to be the most popular one, along
 with `gulp.js`_, brunch_, smoosh_, gear.js_... Those provide an all-in-one
 solution, supported by a myriad of plugins. They are appealing for their
-relative simplicity, and as such, provide a quite decent solution for most
+relative simplicity, and as such, provide a decent solution for most
 projects.
-
-.. _node.js: http://nodejs.org/
-.. _grunt.js: http://gruntjs.com/
-.. _gulp.js: http://gulpjs.com/
-.. _brunch: http://brunch.io/
-.. _smoosh: https://github.com/fat/smoosh
-.. _gear.js: http://gearjs.org/
 
 There are alternatives, however, and they are not without strong arguments.
 Let's not forget the `capability of simple npm scripts`__ for the simplest
-projects. After all, `keeping things small`_ is part of the node.js philosophy,
+projects. After all, `simplicity`_ is part of the node.js philosophy,
 and it naturally makes projects uncomplicated.
-
-.. __: http://substack.net/task_automation_with_npm_run
-.. _keeping things small: http://blog.izs.me/post/
-                          48281998870/unix-philosophy-and-node-js
 
 For more complex situations like Web applications, you may also use a
 :abbr:`UNIX`-ish, generic build system. The most well-known is probably `GNU
-Make`_, but `Ninja`_ is another example. Instead of resting upon plugins,
+Make`_, but `Ninja`_ is another example. Instead of relying upon plugins,
 they let the developer use any command-line statement. As such, they foster
 *composability*, while plugins are more advocating configuration and
 *extensibility*.
 
-.. _GNU Make: https://www.gnu.org/software/make/
-.. _Ninja: http://martine.github.io/ninja/
-
 What does it mean? You can call a command-line tool without the need of any
-build system. But you cannot use a grunt.js plugin outside from the tool
+build system. But you cannot use a grunt.js plugin outside of the tool
 framework. Command-line tools can be written in any language: C++, Ruby, Python,
 etc. A plugin can only be in JavaScript.
+
+.. _node.js: http://nodejs.org/
+.. _Grunt.js: http://gruntjs.com/
+.. _gulp.js: http://gulpjs.com/
+.. _brunch: http://brunch.io/
+.. _smoosh: https://github.com/fat/smoosh
+.. _gear.js: http://gearjs.org/
+.. __: http://substack.net/task_automation_with_npm_run
+.. _simplicity: http://blog.izs.me/post/
+                48281998870/unix-philosophy-and-node-js
+.. _GNU Make: https://www.gnu.org/software/make/
+.. _Ninja: http://martine.github.io/ninja/
 
 Going Incremental
 =================
 
-A build system like ``make`` tracks the state of each file involved, and call
+A build system like ``make`` tracks the state of each file involved, and calls
 the underlying transformation tools only when necessary. In the following
 example, the CoffeeScript_ transpiler_ is called only when ``foo.coffee``
-have been modified since the last build:
-
-.. _CoffeeScript: http://coffeescript.org/
-.. _transpiler: http://en.wikipedia.org/wiki/Source-to-source_compiler
+has been modified since the last build:
 
 .. code-block:: make
 
@@ -64,7 +58,7 @@ have been modified since the last build:
         $(BIN)coffee -sc < $< > $@
 
 Here ``$<`` and ``$@`` are `automatic variables`_ providing contextual
-file paths. We also make sure to use the local CoffeeScript compiler, because
+file paths. We also make sure to use the local CoffeeScript transpiler, because
 we want to control the version. Calling ``make`` from the command line yields:
 
 .. _automatic variables: https://www.gnu.org/software/make/manual/
@@ -80,6 +74,9 @@ we want to control the version. Calling ``make`` from the command line yields:
 The behavior is called the *incremental build*, or sometimes \`\`minimal
 rebuild''. This is especially useful on large projects, where it makes
 development iterations faster.
+
+.. _CoffeeScript: http://coffeescript.org/
+.. _transpiler: http://en.wikipedia.org/wiki/Source-to-source_compiler
 
 Where are my tasks?
 ===================
@@ -115,12 +112,7 @@ Make makes this pretty easy to do:
         $(BIN)coffee -sc < $< > $@
 
 It is combined here with the `wildcard function`_ to avoid listing files
-manually. Arguably, it is easier, or not, to read than -- for example -- the
-`globbing technique`_ in grunt.js:
-
-.. _wildcard function: http://www.gnu.org/software/make/manual/
-                       make.html#Wildcard-Function
-.. _globbing technique: https://www.npmjs.org/package/grunt-contrib-coffee
+manually. For comparaison is the `globbing technique`_ in grunt.js:
 
 .. code-block:: js
 
@@ -136,18 +128,22 @@ manually. Arguably, it is easier, or not, to read than -- for example -- the
         }
     }
 
-In a lot of cases the grunt.js file may actually be simpler. This is partly
-because plugins target specific use cases while the ``Makefile`` syntax is
-broad. The benefit of ``make``, then, arise from its flexibility -- the ability
-to change micro-behaviors. With plugins this is done by configuration, where
-you rely on the implementor choices.
+In a bunch of cases the grunt.js file will be simpler. This is partly because
+plugins target specific use cases while the ``Makefile`` syntax is broader. The
+benefit of ``make`` arise from its flexibility -- the ability to change
+micro-behaviors. With plugins this is done by configuration, where you rely on
+its implementor choices.
+
+.. _wildcard function: http://www.gnu.org/software/make/manual/
+                       make.html#Wildcard-Function
+.. _globbing technique: https://www.npmjs.org/package/grunt-contrib-coffee
 
 Let's Concat
 ============
 
-Here is a more complete example: let's say we want to compile all our coffee
-scripts to Javascript, then concatenate and minify them into a `bundle.js`.
-Here's a solution:
+Here is a more complete example: let's say we want to transpile all our
+CoffeeScript sources to Javascript, then concatenate and minify them into a
+``bundle.js``. Here's a possible solution:
 
 .. code-block:: make
 
@@ -170,14 +166,16 @@ configuration and intermediate file.
 
 This simple example lacks some features, notably the source
 map generation. This could be done with a custom ``cat`` command and `specifying
-an input source map to uglifyjs`__.
+an input source map to uglifyjs`__; but using a powerful module system like
+`browserify`_ is probably better anyway.
 
 .. __: https://github.com/mishoo/UglifyJS2#composed-source-map
+.. _browserify: https://github.com/substack/node-browserify
 
 Rebuild on Change
 =================
 
-One of the handy grunt.js plugins is grunt-contrib-watch_ that let you
+A handy grunt.js plugins is grunt-contrib-watch_ that enables you to
 execute tasks when some file changes; making development iterations faster.
 How can we get this behavior with ``make``?
 
@@ -192,13 +190,13 @@ command-line tool. We can add a new phony target ``auto`` as such:
         $(BIN)supervisor -q -w . -e 'coffee' -n exit -x make all
 
 ``-n exit`` prevents ``supervisor`` from running ``make`` again and again.
-``-x make`` replace the default program -- ``node`` -- run by ``supervisor``.
+``-x make`` replaces the default program (``node``) run by ``supervisor``.
 ``all`` will be passed as argument, the rule we defined before; so that
-indeed the coffee files are recompiled on change. Note that the
+indeed the coffee files are retranspiled on change. Note that the
 incremental build is still in action here: when a file change, only this one
 is transpiled to JavaScript.
 
-Let's imagine this is part of a static website compilation process: we may
+Let's imagine this is part of a static website build process: we may
 want to serve the files in the ``dest`` directory over HTTP. The serve_
 package and command-line tool can fulfill this goal:
 
@@ -230,16 +228,16 @@ documentation.
 Conclusion
 ==========
 
-Using a ``Makefile`` also let you use any version of the packages. They don't
-even have to be ``npm`` packages: you may use ruby gems, etc. -- Sass_ comes to
-mind. With node.js build tools, some plugins use `broad specifiers`_ or
-`peerDependencies`_ to let you choose the version, but you're out of luck if you
-want to use a newer, unsupported version. In this case, forking the plugin may
-be necessary.
+Using a ``Makefile`` also enables you to use any version of the packages. They
+don't necessarily have to be ``npm`` packages. For instance, you can use ruby
+gems, like Sass_. With node.js build tools, some plugins use `broad specifiers`_
+or `peerDependencies`_ to let you choose the version, but you're out of luck if
+you want to use a newer, unsupported version. In this case, forking the plugin
+may be necessary.
 
-Using Makefiles is essentially bringing a bunch of small, existing tools;
+Using Makefiles is essentially bringing a bunch of small existing tools
 and assembling them as building bricks. The tools themselves can be arbitrarily
-complex and in any language -- javascript, bash --, so you are not limited.
+complex and in any language, so you are not limited.
 
 Now, for the ugly: yes, GNU Make on Windows can be a total pain. Similarly,
 the shell that executes the command-lines -- ``cmd.exe`` -- lacks a lot of
